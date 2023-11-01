@@ -1,7 +1,11 @@
 package com.example.store.config;
 
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.SqlSessionFactoryBean;
+import org.mybatis.spring.mapper.MapperScannerConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import java.io.IOException;
@@ -26,5 +30,22 @@ public class AppConfig {
         dataSource.setPassword(
                 properties.getProperty("spring.datasource.password"));
         return dataSource;
+    }
+
+    @Bean
+    public SqlSessionFactory sqlSessionFactory() throws Exception {
+        SqlSessionFactoryBean sessionFactory = new SqlSessionFactoryBean();
+        sessionFactory.setDataSource(dataSource());
+        sessionFactory.setMapperLocations(new PathMatchingResourcePatternResolver().getResources(
+                "classpath:com/example/store/persistence/mapper/*.xml"));
+        return sessionFactory.getObject();
+    }
+
+    @Bean
+    public MapperScannerConfigurer mapperScannerConfigurerSAS() {
+        MapperScannerConfigurer mapperScannerConfigurer = new MapperScannerConfigurer();
+        mapperScannerConfigurer.setBasePackage("com.example.store.persistence.mapper");
+        mapperScannerConfigurer.setSqlSessionFactoryBeanName("sqlSessionFactory");
+        return mapperScannerConfigurer;
     }
 }
